@@ -1,0 +1,44 @@
+/* Глобальный сброс */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent; /* Убирает синий блик при нажатии на мобилках */
+}
+
+html, body, #root {
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  overflow: hidden; /* Предотвращает лишнюю прокрутку всего окна */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Стили для скроллбара (опционально, для красоты в Chrome) */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+/* Утилитарные классы */
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Обертка для AnimatePresence, чтобы position: absolute работало */
+.animate-presence-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}

@@ -1,0 +1,51 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border-radius: 12px;
+  background-color: rgba(128, 128, 128, 0.1);
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+/* Состояние фокуса */
+.inputWrapper:focus-within {
+  background-color: rgba(128, 128, 128, 0.05);
+  /* Бордер покрасим через инлайновый стиль в JSX, так как цвет динамический */
+}
+
+.inputField {
+  flex: 1;
+  padding: 14px 16px;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  color: inherit; /* Берет цвет текста от PageContainer */
+}
+
+.inputField::placeholder {
+  color: #888;
+}
+
+.iconLeft {
+  margin-left: 12px;
+  color: #888;
+}
+
+.iconRight {
+  margin-right: 12px;
+  cursor: pointer;
+  color: #888;
+  display: flex;
+  align-items: center;
+}

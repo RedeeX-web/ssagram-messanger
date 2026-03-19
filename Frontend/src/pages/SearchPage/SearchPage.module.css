@@ -1,0 +1,74 @@
+.searchWrapper {
+  padding: 16px;
+}
+
+.actionList {
+  padding: 0 16px;
+}
+
+.actionItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  cursor: pointer;
+}
+
+.actionIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(128, 128, 128, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionText {
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.sectionTitle {
+  padding: 20px 16px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.resultItem {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  gap: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.resultItem:active {
+  background: rgba(128, 128, 128, 0.05);
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(128, 128, 128, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+}
+
+.name {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.emptyState {
+  text-align: center;
+  margin-top: 40px;
+  color: #888;
+}

@@ -1,0 +1,21 @@
+.fab {
+  position: fixed;
+  bottom: 130px; /* Выше TabBar */
+  right: 30px;
+  width: 56px;
+  height: 56px;
+  border-radius: 30px; /* Делаем слегка закругленный квадрат, как в современных UI */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 999;
+}
+
+.fab:active {
+  transform: scale(0.9) rotate(5deg);
+}

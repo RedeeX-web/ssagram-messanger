@@ -1,0 +1,57 @@
+/* MessageActions.module.css */
+.overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end; /* Для мобилок прижимаем к низу */
+}
+
+/* Стили для ПК */
+.desktopMenu {
+  position: absolute;
+  background: rgba(20, 20, 20, 0.8);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 6px;
+  min-width: 180px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+/* Стили для мобилок (Bottom Sheet) */
+.bottomSheet {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05); /* Твой стеклянный эффект */
+  backdrop-filter: blur(25px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px 20px 0 0;
+  padding: 10px 16px 30px 16px;
+}
+
+.handle {
+  width: 40px; height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  margin: 0 auto 15px auto;
+}
+
+.menuItem {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px;
+  color: white; font-size: 16px;
+  cursor: pointer; border-radius: 10px;
+}
+
+.menuItem:active, .menuItem:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.delete { color: #ff4d4d; }
+
+.cancelBtn {
+  margin-top: 10px;
+  display: flex; justify-content: center; align-items: center; gap: 8px;
+  padding: 14px; color: #aaa;
+}

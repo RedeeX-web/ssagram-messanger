@@ -1,0 +1,55 @@
+.button {
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #ffffff;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Эффект при нажатии */
+.button:active {
+  transform: scale(0.97);
+  filter: brightness(0.9);
+}
+
+/* Состояние заблокированной кнопки */
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.4);
+}
+
+.disabled:active {
+  transform: none;
+}
+
+/* Вариант "outline" (прозрачная кнопка с рамкой, например для Logout) */
+.outline {
+  background: transparent !important;
+  border: 2px solid currentColor;
+  border-radius: 12px;
+}
+
+.loader {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

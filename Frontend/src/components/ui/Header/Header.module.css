@@ -1,0 +1,49 @@
+.header {
+  height: 60px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  color: #ffffff;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  position: relative;
+  transition: background-color 0.3s ease;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.backButton:active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.title {
+  flex: 1;
+  font-size: 19px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Если шапка в ChatRoomPage, текст может быть по центру */
+}
+
+.titleCenter {
+  text-align: center;
+}
+
+.rightAction {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  cursor: pointer;
+}

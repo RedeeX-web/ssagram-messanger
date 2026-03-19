@@ -1,0 +1,73 @@
+.listContainer {
+  padding: 8px 16px;
+  display: flex;
+  flex-direction: column;
+  /* Добавляем отступ снизу, чтобы контент не залезал под TabBar и FAB */
+  padding-bottom: 90px; 
+}
+
+.chatItem {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.1);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.chatItem:active {
+  opacity: 0.6;
+}
+
+.avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background-color: rgba(128, 128, 128, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 14px;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.chatInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0; /* Нужно для работы ellipsis */
+}
+
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chatName {
+  font-weight: 600;
+  font-size: 17px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lastMsg {
+  font-size: 14px;
+  color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 60px;
+  color: #888;
+  gap: 12px;
+}

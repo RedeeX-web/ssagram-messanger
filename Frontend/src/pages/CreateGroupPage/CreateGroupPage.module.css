@@ -1,0 +1,19 @@
+.container {
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hint {
+  font-size: 14px;
+  color: #888;
+  padding-left: 4px;
+  margin-top: -8px;
+  margin-bottom: 24px;
+}
+
+.hint span {
+  font-weight: 600;
+  color: var(--accent-color);
+}
