@@ -53,15 +53,6 @@ io.on("connection", (socket) => {
         console.log(`Пользователь ${socket.id} зашел в чат: ${chatId}`);
     });
 
-    // Когда кто-то отправляет сообщение
-    io.to(chatId).emit('receive_message', {
-        _id: message._id,
-        chatId,
-        senderId,
-        text: text, // Отправляем чистый текст для мгновенного отображения
-        createdAt: message.createdAt
-    });
-
     socket.on("disconnect", () => {
         console.log("Пользователь отключился");
     });
@@ -95,6 +86,8 @@ app.post('/api/auth', asyncHandler(async (req, res) => {
             return res.status(401).json({ message: 'Неверные данные' });
         }
     }
+
+
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '30d' });
     res.json({ token, user });
@@ -211,7 +204,6 @@ app.delete('/api/messages/:messageId', asyncHandler(async (req, res) => {
     const message = await Message.findById(messageId);
     if (!message) return res.status(404).json({ message: "Не найдено" });
 
-    // Проверка: только автор может удалить
     if (message.senderId.toString() !== userId.toString()) {
         return res.status(403).json({ message: "Нет прав" });
     }
@@ -219,20 +211,33 @@ app.delete('/api/messages/:messageId', asyncHandler(async (req, res) => {
     const chatId = message.chatId.toString();
     await message.deleteOne();
 
-    // ОПОВЕЩАЕМ ВСЕХ В КОМНАТЕ ЧАТА
-    // Это заставит фронтенд у всех участников сработать мгновенно
+    // 1. Оповещаем участников открытого чата (удаление из экрана)
     io.to(chatId).emit('message_deleted', messageId);
 
-    // Обновляем последнее сообщение в чате для списка (ChatListPage)
+    // 2. Ищем новое последнее сообщение для обновления превью
     const lastMsg = await Message.findOne({ chatId }).sort({ createdAt: -1 });
     const chat = await Chat.findById(chatId);
+    
+    // Обновляем чат в базе
     chat.lastMessage = lastMsg ? { text: lastMsg.text, at: lastMsg.createdAt } : null;
     await chat.save();
 
-    // Оповещаем список чатов (чтобы превью тоже обновилось)
+    // 3. Оповещаем список чатов (чтобы превью обновилось правильно)
+    let previewText = "";
+    if (lastMsg) {
+        try {
+            previewText = decrypt(lastMsg.text); // Дешифруем для списка чатов
+        } catch (e) {
+            previewText = "Сообщение";
+        }
+    }
+
     io.emit('update_chat_list', {
         chatId,
-        lastMessage: { text, createdAt: message.createdAt }
+        lastMessage: lastMsg ? { 
+            text: previewText, 
+            createdAt: lastMsg.createdAt 
+        } : null
     });
 
     res.json({ success: true, messageId });
@@ -269,6 +274,14 @@ app.post('/api/messages', asyncHandler(async (req, res) => {
     chat.updatedAt = Date.now(); // <--- ВОТ ЭТА СТРОЧКА поднимает чат в базе
     await chat.save();
 
+    io.to(chatId).emit('receive_message', {
+        _id: message._id,
+        chatId: chatId,
+        senderId: senderId,
+        text: text, // Исходный текст для мгновенного отображения
+        createdAt: message.createdAt
+    });
+
     // 4. Проверка участника (если это группа и отправителя там нет — добавляем)
     const isParticipant = chat.participants.some(p => p.toString() === senderId.toString());
     if (chat.type === 'group' && !isParticipant) {
@@ -292,7 +305,6 @@ app.post('/api/messages', asyncHandler(async (req, res) => {
             createdAt: message.createdAt // ИСПОЛЬЗУЕМ 'message', а не 'newMessage'
         }
     });
-
     res.status(201).json(message);
 }));
 

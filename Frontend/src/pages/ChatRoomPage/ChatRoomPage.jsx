@@ -27,15 +27,32 @@ const ChatRoomPage = () => {
     if (!id) return;
 
     // 1. Сначала описываем функцию (теперь она точно defined!)
-    const handleReceiveMessage = (data) => {
+const handleReceiveMessage = (data) => {
       console.log("Пришло сообщение через сокет:", data);
+      
       setMessages((prev) => {
-        // Не добавляем, если такое ID уже есть в списке
+        // 1. Проверяем по реальному ID (если вдруг пришло дважды)
         if (prev.find(m => m._id === data._id)) return prev;
+
+        // 2. Умная проверка: если это сообщение от НАС и у нас в списке 
+        // есть временное сообщение с таким же текстом — заменяем его на нормальное
+        const tempIndex = prev.findIndex(m => 
+          m.senderId === data.senderId && 
+          m.text === data.text && 
+          (m.isTemp || m._id.length < 20) // Временные ID короткие
+        );
+
+        if (tempIndex !== -1) {
+          const newMessages = [...prev];
+          newMessages[tempIndex] = data; // Заменяем временное на серверное
+          return newMessages;
+        }
+
+        // 3. Если это сообщение от другого человека, просто добавляем
         return [...prev, data];
       });
     };
-
+    
     const handleMessageDeleted = (deletedMessageId) => {
       setMessages((prev) => prev.filter((msg) => msg._id !== deletedMessageId));
     };
@@ -71,40 +88,32 @@ const ChatRoomPage = () => {
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
-    console.log("Пришло сообщение через сокет:", data);
-    const textToSend = newMessage; // Сохраняем чистый текст
 
-    // Оптимистичное обновление: добавляем в список СРАЗУ чистый текст
+    const textToSend = newMessage;
+    const tempId = Date.now().toString(); // Временный ID для твоего экрана
+
+    // Оптимистичное обновление: добавляем СРАЗУ, чтобы юзер не ждал
     const tempMsg = {
-      _id: Date.now().toString(),
+      _id: tempId,
       senderId: user._id,
-      text: textToSend, // ТУТ ДОЛЖЕН БЫТЬ ОБЫЧНЫЙ ТЕКСТ
+      text: textToSend,
       createdAt: new Date().toISOString(),
+      isTemp: true // Пометка, что это временное сообщение
     };
 
-    setMessages((prev) => {
-      // 1. Если это наше сообщение (мы его уже добавили через handleSendMessage), 
-      // просто игнорируем его от сокета или заменяем временное на постоянное
-      const isDuplicate = prev.find(m => m._id === data._id);
-      if (isDuplicate) return prev;
-
-      // 2. Если это сообщение от нас, но с временным ID (Date.now()), 
-      // можно попробовать найти его по тексту и времени, но проще оставить 
-      // проверку на senderId, если мы доверяем оптимистичному обновлению.
-
-      return [...prev, data];
-    });
+    setMessages((prev) => [...prev, tempMsg]);
+    setNewMessage('');
 
     try {
       await axios.post(`${BASE_URL}/messages`, {
         chatId: id,
         senderId: user._id,
-        text: textToSend // На сервер уходит чистый текст, он сам его зашифрует для базы
+        text: textToSend
       });
     } catch (err) {
       console.error(err);
-      // Если ошибка, удаляем временное сообщение
-      setMessages(prev => prev.filter(m => m._id !== tempMsg._id));
+      // Если сервер вернул ошибку, удаляем временный пузырь
+      setMessages(prev => prev.filter(m => m._id !== tempId));
     }
   };
 
