@@ -54,9 +54,12 @@ io.on("connection", (socket) => {
     });
 
     // Когда кто-то отправляет сообщение
-    socket.on("send_message", (data) => {
-        // Рассылаем это сообщение всем, кто находится в этой же комнате (chatId)
-        io.to(data.chatId).emit("receive_message", data);
+    io.to(chatId).emit('receive_message', {
+        _id: message._id,
+        chatId,
+        senderId,
+        text: text, // Отправляем чистый текст для мгновенного отображения
+        createdAt: message.createdAt
     });
 
     socket.on("disconnect", () => {
@@ -227,7 +230,10 @@ app.delete('/api/messages/:messageId', asyncHandler(async (req, res) => {
     await chat.save();
 
     // Оповещаем список чатов (чтобы превью тоже обновилось)
-    io.emit('update_chat_list', { chatId });
+    io.emit('update_chat_list', {
+        chatId,
+        lastMessage: { text, createdAt: message.createdAt }
+    });
 
     res.json({ success: true, messageId });
 }));
@@ -235,11 +241,16 @@ app.delete('/api/messages/:messageId', asyncHandler(async (req, res) => {
 app.post('/api/messages', asyncHandler(async (req, res) => {
     const { chatId, senderId, text } = req.body;
 
+    console.log(`[SOCKET_LOG] Попытка отправки сообщения в чат: ${chatId} от: ${senderId}`);
+
     // 1. Находим чат
     const chat = await Chat.findById(chatId);
     if (!chat) {
+        console.log(`[SOCKET_LOG] ОШИБКА: Чат ${chatId} не найден`);
         return res.status(404).json({ message: "Чат не найден" });
     }
+
+    console.log(`[SOCKET_LOG] Рассылка receive_message в комнату: ${chatId}`);
 
     // 2. Шифруем текст для базы данных
     const encryptedText = encrypt(text);

@@ -71,7 +71,7 @@ const ChatRoomPage = () => {
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
-
+    console.log("Пришло сообщение через сокет:", data);
     const textToSend = newMessage; // Сохраняем чистый текст
 
     // Оптимистичное обновление: добавляем в список СРАЗУ чистый текст
@@ -82,8 +82,18 @@ const ChatRoomPage = () => {
       createdAt: new Date().toISOString(),
     };
 
-    setMessages(prev => [...prev, tempMsg]);
-    setNewMessage('');
+    setMessages((prev) => {
+      // 1. Если это наше сообщение (мы его уже добавили через handleSendMessage), 
+      // просто игнорируем его от сокета или заменяем временное на постоянное
+      const isDuplicate = prev.find(m => m._id === data._id);
+      if (isDuplicate) return prev;
+
+      // 2. Если это сообщение от нас, но с временным ID (Date.now()), 
+      // можно попробовать найти его по тексту и времени, но проще оставить 
+      // проверку на senderId, если мы доверяем оптимистичному обновлению.
+
+      return [...prev, data];
+    });
 
     try {
       await axios.post(`${BASE_URL}/messages`, {
