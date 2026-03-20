@@ -25,7 +25,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 app.use(express.json());
 app.use(cors({
-    origin: true, 
+    origin: true,
     credentials: true
 }));
 // Логгер запросов (лаконичный)
@@ -36,7 +36,9 @@ app.use((req, res, next) => {
 
 const io = new Server(server, {
     cors: {
-        origin: true, // Позволяет сокетам подключаться через туннель
+        origin: [
+            "http://localhost:5173",
+            "https://ssagram-messanger.vercel.app"], // Позволяет сокетам подключаться через туннель
         methods: ["GET", "POST"],
         credentials: true
     },

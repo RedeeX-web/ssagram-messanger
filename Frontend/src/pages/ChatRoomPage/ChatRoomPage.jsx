@@ -23,6 +23,14 @@ const ChatRoomPage = () => {
   const scrollRef = useRef(null);
   const isMobile = window.innerWidth <= 768;
 
+  socket.on("connect_error", (err) => {
+    console.log(`Ошибка подключения: ${err.message}`);
+  });
+
+  socket.on("connect", () => {
+    console.log("Сокет успешно подключен к серверу!");
+  });
+
   // Загрузка сообщений и инфо о чате
   useEffect(() => {
     const fetchChatData = async () => {
