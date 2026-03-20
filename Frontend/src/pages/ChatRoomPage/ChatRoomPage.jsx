@@ -22,56 +22,35 @@ const ChatRoomPage = () => {
   const scrollRef = useRef(null);
   const isMobile = window.innerWidth <= 768;
 
-  socket.on("connect_error", (err) => {
-    console.log(`Ошибка подключения: ${err.message}`);
-  });
-
-  socket.on("connect", () => {
-    console.log("Сокет успешно подключен к серверу!");
-  });
-
-  socket.on("receive_message", handleReceiveMessage);
-
   // 1. Слушатели сокетов и вход в комнату
   useEffect(() => {
     if (!id) return;
 
-    // Сигнализируем серверу, что мы зашли в конкретный чат
-    socket.emit("join_chat", id);
-
+    // 1. Сначала описываем функцию (теперь она точно defined!)
     const handleReceiveMessage = (data) => {
-      console.log("Данные получены через сокет:", data);
-
+      console.log("Пришло сообщение через сокет:", data);
       setMessages((prev) => {
-        // Проверка: если сообщение от нас самих, оно уже добавлено оптимистично
-        // Проверяем по тексту и времени, так как ID у оптимистичного сообщения временный
-        if (data.senderId === user._id) {
-          // Можно обновить временное сообщение настоящим ID из базы, если нужно
-          return prev;
-        }
-
-        // Если сообщение от собеседника — добавляем
+        // Не добавляем, если такое ID уже есть в списке
         if (prev.find(m => m._id === data._id)) return prev;
         return [...prev, data];
       });
     };
 
     const handleMessageDeleted = (deletedMessageId) => {
-      console.log("Сообщение удалено сервером:", deletedMessageId);
       setMessages((prev) => prev.filter((msg) => msg._id !== deletedMessageId));
     };
 
-    // Подписываемся на события
+    // 2. Только ПОСЛЕ описания функций подписываемся на события
+    socket.emit("join_chat", id);
     socket.on("receive_message", handleReceiveMessage);
     socket.on("message_deleted", handleMessageDeleted);
 
-    // Очистка при выходе из чата
+    // 3. Очистка при закрытии компонента
     return () => {
       socket.off("receive_message", handleReceiveMessage);
       socket.off("message_deleted", handleMessageDeleted);
-      // socket.emit("leave_chat", id); // Если на бэкенде есть такая логика
     };
-  }, [id]); // Перезапускается при смене чата
+  }, [id]); // Эффект сработает заново при переходе в другой чат
 
   // 2. Загрузка истории (отдельный эффект)
   useEffect(() => {
