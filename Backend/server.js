@@ -48,16 +48,15 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
     console.log("Пользователь подключился:", socket.id);
 
-    // Когда пользователь заходит в чат, мы добавляем его в "комнату" этого чата
     socket.on("join_chat", (chatId) => {
         socket.join(chatId);
-        console.log(`Юзер зашел в комнату: ${chatId}`);
+        console.log(`Пользователь ${socket.id} зашел в чат: ${chatId}`);
     });
 
     // Когда кто-то отправляет сообщение
     socket.on("send_message", (data) => {
         // Рассылаем это сообщение всем, кто находится в этой же комнате (chatId)
-        socket.to(data.chatId).emit("receive_message", data);
+        io.to(data.chatId).emit("receive_message", data);
     });
 
     socket.on("disconnect", () => {
@@ -273,13 +272,6 @@ app.post('/api/messages', asyncHandler(async (req, res) => {
     chat.updatedAt = Date.now(); // КРИТИЧНО для сортировки списка чатов
 
     await chat.save();
-
-    // 6. Socket.io: Отправляем в конкретную комнату чата (для ChatRoomPage)
-    // Передаем исходный 'text', чтобы получатель сразу его увидел без расшифровки
-    io.to(chatId).emit("receive_message", {
-        ...message.toObject(),
-        text: text
-    });
 
     // 7. Socket.io: Оповещаем всех об обновлении списка (для ChatListPage)
     io.emit('update_chat_list', {

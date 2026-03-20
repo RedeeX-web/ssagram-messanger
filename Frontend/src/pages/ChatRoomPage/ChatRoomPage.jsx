@@ -12,7 +12,6 @@ import { useTheme } from '../../context/ThemeContext';
 
 const ChatRoomPage = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
   const { accentColor } = useTheme();
   const [messages, setMessages] = useState([]);
@@ -31,7 +30,50 @@ const ChatRoomPage = () => {
     console.log("Сокет успешно подключен к серверу!");
   });
 
-  // Загрузка сообщений и инфо о чате
+  socket.on("receive_message", handleReceiveMessage);
+
+  // 1. Слушатели сокетов и вход в комнату
+  useEffect(() => {
+    if (!id) return;
+
+    // Сигнализируем серверу, что мы зашли в конкретный чат
+    socket.emit("join_chat", id);
+
+    const handleReceiveMessage = (data) => {
+      console.log("Данные получены через сокет:", data);
+
+      setMessages((prev) => {
+        // Проверка: если сообщение от нас самих, оно уже добавлено оптимистично
+        // Проверяем по тексту и времени, так как ID у оптимистичного сообщения временный
+        if (data.senderId === user._id) {
+          // Можно обновить временное сообщение настоящим ID из базы, если нужно
+          return prev;
+        }
+
+        // Если сообщение от собеседника — добавляем
+        if (prev.find(m => m._id === data._id)) return prev;
+        return [...prev, data];
+      });
+    };
+
+    const handleMessageDeleted = (deletedMessageId) => {
+      console.log("Сообщение удалено сервером:", deletedMessageId);
+      setMessages((prev) => prev.filter((msg) => msg._id !== deletedMessageId));
+    };
+
+    // Подписываемся на события
+    socket.on("receive_message", handleReceiveMessage);
+    socket.on("message_deleted", handleMessageDeleted);
+
+    // Очистка при выходе из чата
+    return () => {
+      socket.off("receive_message", handleReceiveMessage);
+      socket.off("message_deleted", handleMessageDeleted);
+      // socket.emit("leave_chat", id); // Если на бэкенде есть такая логика
+    };
+  }, [id]); // Перезапускается при смене чата
+
+  // 2. Загрузка истории (отдельный эффект)
   useEffect(() => {
     const fetchChatData = async () => {
       try {
@@ -45,51 +87,8 @@ const ChatRoomPage = () => {
         console.error("Ошибка загрузки:", err);
       }
     };
-
     fetchChatData();
-    socket.emit('join_room', id);
-
-    socket.on('receive_message', (data) => {
-      // Если текст похож на зашифрованный (например, содержит специальные символы или длинный хеш)
-      // Либо если ты точно знаешь, что сервер шлет зашифрованный:
-      const decryptedText = decrypt(data.text);
-
-      setMessages((prev) => {
-        if (prev.find(m => m._id === data._id)) return prev;
-        return [...prev, { ...data, text: decryptedText }];
-      });
-    });
-
-    socket.on('message_deleted', (deletedMessageId) => {
-      console.log("Сообщение удалено сервером:", deletedMessageId);
-
-      // Мгновенно обновляем стейт, убирая сообщение из массива
-      setMessages((prevMessages) =>
-        prevMessages.filter((msg) => msg._id !== deletedMessageId)
-      );
-    });
-
-    return () => {
-      socket.off('message_deleted'); // Важно отписываться при выходе
-    };
-
-    // socket.on('message_deleted', (deletedId) => {
-    //   setMessages((prev) => prev.filter(m => m._id !== deletedId));
-    // });
-
-    // return () => {
-    //   socket.emit('leave_room', id);
-    //   socket.off('receive_message');
-    //   socket.off('message_deleted');
-    // };
   }, [id]);
-
-  // Автоскролл вниз
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
